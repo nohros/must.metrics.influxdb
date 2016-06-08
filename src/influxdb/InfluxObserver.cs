@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using Nohros.Concurrent;
-using Nohros.Data.Json;
 using Nohros.Extensions.Time;
 using System.Linq;
 using Nohros.Resources;
@@ -19,88 +19,33 @@ namespace Nohros.Metrics.Influx
       public DateTime Timestamp { get; set; }
     }
 
-    const int kMaxPointsPerPost = 150;
+    const int kMaxPointsPerPost = 5000;
 
     readonly IApiEndpoint endpoint_;
-    readonly string host_;
-    readonly string app_;
     readonly ConcurrentQueue<Serie> measures_;
     readonly NonReentrantSchedule scheduler_;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InfluxObserver"/> by
-    /// using the given <paramref name="endpoint"/> and <paramref name="host"/>.
+    /// using the given <paramref name="endpoint"/>.
     /// </summary>
     /// <param name="endpoint">
     /// The <see cref="ApiEndpoint"/> to be used to send the measures.
     /// </param>
-    /// <param name="host">
-    /// The name of the host that should be associated with the measures.
-    /// </param>
-    public InfluxObserver(IApiEndpoint endpoint, string host)
-      : this(endpoint, host, TimeSpan.FromSeconds(30)) {
+    public InfluxObserver(IApiEndpoint endpoint)
+      : this(endpoint, TimeSpan.FromSeconds(30)) {
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InfluxObserver"/> by
-    /// using the given <paramref name="endpoint"/> and <paramref name="host"/>.
+    /// using the given <paramref name="endpoint"/> and <paramref name="ttl"/>.
     /// </summary>
     /// <param name="endpoint">
     /// The <see cref="ApiEndpoint"/> to be used to send the measures.
-    /// </param>
-    /// <param name="host">
-    /// The name of the host that should be associated with the measures.
-    /// </param>
-    /// <param name="app">
-    /// A string that can be used to distinguish one application instance
-    /// from another.
-    /// </param>
-    public InfluxObserver(IApiEndpoint endpoint, string host, string app)
-      : this(endpoint, host, TimeSpan.FromSeconds(30), app) {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="InfluxObserver"/> by
-    /// using the given <paramref name="endpoint"/>, <paramref name="host"/>
-    /// and <paramref name="ttl"/>.
-    /// </summary>
-    /// <param name="endpoint">
-    /// The <see cref="ApiEndpoint"/> to be used to send the measures.
-    /// </param>
-    /// <param name="host">
-    /// The name of the host that should be associated with the measures.
     /// </param>
     /// <param name="ttl">
     /// The maximum time that a mesure should be keep in cache, before send it
     /// to influx's.
-    /// </param>
-    /// <remarks>
-    /// The <paramref name="ttl"/> should be greater than or equals to
-    /// <see cref="TimeSpan.Zero"/>. If <paramref name="ttl"/> is equals to
-    /// <see cref="TimeSpan.Zero"/> the default <paramref name="ttl"/> of
-    /// third seconds will be used.
-    /// </remarks>
-    public InfluxObserver(IApiEndpoint endpoint, string host, TimeSpan ttl)
-      : this(endpoint, host, ttl, string.Empty) {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="InfluxObserver"/> by
-    /// using the given <paramref name="endpoint"/>, <paramref name="host"/>
-    /// <paramref name="ttl"/> and <paramref name="app"/>.
-    /// </summary>
-    /// <param name="endpoint">
-    /// The <see cref="ApiEndpoint"/> to be used to send the measures.
-    /// </param>
-    /// <param name="host">
-    /// The name of the host that should be associated with the measures.
-    /// </param>
-    /// <param name="ttl">
-    /// The maximum time that a mesure should be keep in cache, before send it
-    /// to influx's.
-    /// </param>
-    /// <param name="app">
-    /// The application's name.
     /// </param>
     /// <remarks>
     /// The <paramref name="ttl"/> should be greater than or equals to
@@ -112,25 +57,13 @@ namespace Nohros.Metrics.Influx
     /// before sending it to influx's endpoint.
     /// </para>
     /// </remarks>
-    public InfluxObserver(IApiEndpoint endpoint, string host, TimeSpan ttl,
-      string app) {
-      if (host == null) {
-        throw new ArgumentNullException("host");
-      }
-
+    public InfluxObserver(IApiEndpoint endpoint, TimeSpan ttl) {
       if (ttl < TimeSpan.Zero) {
         throw new ArgumentOutOfRangeException("ttl",
           StringResources.ArgumentOutOfRange_NeedNonNegNum);
       }
 
       endpoint_ = endpoint;
-      host_ = host;
-      app_ = app.Trim();
-
-      // The app should be separated from the metric's name with a dot.
-      if (app_ != "" && !app_.EndsWith(".")) {
-        app_ += ".";
-      }
 
       measures_ = new ConcurrentQueue<Serie>();
 
@@ -164,39 +97,33 @@ namespace Nohros.Metrics.Influx
         }
 
         if (series.Count > 0) {
-          JsonStringBuilder json =
-            new JsonStringBuilder()
-              .WriteBeginObject()
-              .WriteMemberName("series")
-              .WriteBeginArray()
-              .ForEach(series, WriteSerie)
-              .WriteEndArray()
-              .WriteEndObject();
-
-          endpoint_.PostSeries(json.ToString());
+          var points = new StringBuilder();
+          foreach (var s in series) {
+            WriteSerie(s, points);
+          }
+          endpoint_.PostSeries(points.ToString());
         }
         count = 0;
       } while (count >= kMaxPointsPerPost);
     }
 
-    void WriteSerie(Serie serie, JsonStringBuilder json) {
-      json
-        .WriteBeginObject()
-        .WriteMember("metric", app_ + serie.Name)
-        .WriteMemberName("points")
-        .WriteBeginArray()
-        .WriteBeginArray()
-        .WriteNumber(serie.Timestamp.ToUnixEpoch())
-        .WriteNumber(serie.Measure)
-        .WriteEndArray()
-        .WriteEndArray()
-        .WriteMember("type", "gauge")
-        .WriteMember("host", host_)
-        .WriteMemberName("tags")
-        .WriteBeginArray()
-        .ForEach(serie.Tags, (tag, builder) => builder.WriteString(tag))
-        .WriteEndArray()
-        .WriteEndObject();
+    void WriteSerie(Serie serie, StringBuilder points) {
+      long epoch_ns = serie.Timestamp.ToUnixEpoch().ToNanos(TimeUnit.Seconds);
+      string measure =
+        (serie.Measure%1 == 0d)
+          ? serie.Measure.ToString("0i")
+          : serie.Measure.ToString("G");
+
+      points
+        .Append(serie.Name)
+        .Append(",")
+        .Append(serie.Tags)
+        .Append(" ")
+        .Append("value=")
+        .Append(measure)
+        .Append(" ")
+        .Append(epoch_ns)
+        .Append("\n");
     }
 
     public void Observe(Measure measure, DateTime timestamp) {
@@ -206,16 +133,15 @@ namespace Nohros.Metrics.Influx
         Timestamp = timestamp
       };
 
-      Tag[] tags = measure.MetricConfig.Tags.ToArray();
+      // influxdb recommendto sort the tags by key for better performance
+      Tag[] tags = measure.MetricConfig.Tags.OrderBy(s => s.Name).ToArray();
       var plain_tags = new string[tags.Length];
       for (int i = 0; i < tags.Length; i++) {
         Tag tag = tags[i];
-        plain_tags[i] = tag.Name + ":" + tag.Value;
+        plain_tags[i] = tag.Name + "=" + tag.Value;
       }
       serie.Tags = plain_tags;
 
-      // If the limit is 1, publish the measure directly to avoid storing it
-      // into the queue.
       measures_.Enqueue(serie);
     }
   }

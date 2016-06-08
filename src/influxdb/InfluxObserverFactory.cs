@@ -41,61 +41,50 @@ namespace Nohros.Metrics.Influx
     /// </param>
     /// <returns></returns>
     public IInfluxMeasureObserver Create(ApiEndpointConfig endpoint) {
-      return Create(endpoint.Uri, endpoint.ApiKey, endpoint.Host, endpoint.Proxy,
-        endpoint.AppName);
+      return Create(endpoint.Uri, endpoint.Database, endpoint.Proxy);
     }
 
     /// <summary>
     /// Creates a instance of the influx's implementation of the
     /// <see cref="IInfluxMeasureObserver"/> by using the given
-    /// <paramref name="endpoint_uri"/> and <paramref name="api_key"/> and
-    /// the current machine's name as the host.
+    /// <paramref name="endpoint_uri"/> proxy information.
     /// </summary>
     /// <param name="endpoint_uri">
     /// A <see cref="ApiEndpointConfig"/> object containing the configuration
     /// information for the influx's endpoint.
     /// </param>
-    /// <param name="api_key">
-    /// The api key to be used when sending data do influx's endpoint
+    /// <param name="database">
+    /// The name of the database that should be used to store the metrics.
     /// </param>
     /// <returns></returns>
-    public IInfluxMeasureObserver Create(string endpoint_uri, string api_key) {
-      return Create(endpoint_uri, api_key, Environment.MachineName);
+    public IInfluxMeasureObserver Create(string endpoint_uri,
+      string database) {
+      return Create(endpoint_uri, database, string.Empty);
     }
 
     /// <summary>
     /// Creates a instance of the influx's implementation of the
     /// <see cref="IInfluxMeasureObserver"/> by using the given
-    /// <paramref name="endpoint_uri"/>, <paramref name="api_key"/> and
-    /// <paramref name="host"/>.
+    /// <paramref name="endpoint_uri"/> proxy information.
     /// </summary>
-    /// <param name="host">
-    /// The name of the host.
-    /// </param>
     /// <param name="endpoint_uri">
     /// A <see cref="ApiEndpointConfig"/> object containing the configuration
     /// information for the influx's endpoint.
     /// </param>
-    /// <param name="api_key">
-    /// The api key to be used when sending data do influx's endpoint
+    /// <param name="database">
+    /// The name of the database that should be used to store the metrics.
     /// </param>
     /// <param name="proxy">
     /// Specifies the proxy to be used to send the metrics to the influx's
     /// endpoint. This value should be specified in the format:
     /// "http[s]://[username]:[password]@proxy.com"
     /// </param>
-    /// <param name="app">
-    /// A string that can be used to distinguish one application instance
-    /// from another.
-    /// </param>
     /// <returns></returns>
     public IInfluxMeasureObserver Create(string endpoint_uri,
-      string api_key,
-      string host,
-      string proxy = "",
-      string app = "") {
-      var endpoint = new ApiEndpoint(endpoint_uri, api_key, proxy);
-      return new InfluxObserver(endpoint, host, app);
+      string database,
+      string proxy) {
+      var endpoint = new ApiEndpoint(endpoint_uri, database, proxy);
+      return new InfluxObserver(endpoint);
     }
   }
 }

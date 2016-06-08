@@ -54,7 +54,7 @@
     <Compile Include="config\ApiEndpointsConfig.cs" />
     <Compile Include="InfluxLogger.cs" />
     <Compile Include="InfluxObserver.cs" />
-    <Compile Include="DatadogObserverFactory.cs" />
+    <Compile Include="InfluxObserverFactory.cs" />
     <Compile Include="ApiEndpoint.cs" />
     <Compile Include="IApiEndpoint.cs" />
     <Compile Include="IInfluxMeasureObserver.cs" />

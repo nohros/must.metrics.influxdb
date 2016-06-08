@@ -12,6 +12,15 @@ namespace Nohros.Metrics.Influx.Config
     /// <summary>
     /// Specifies the uri of the influxdb endpoint.
     /// </summary>
+    [ConfigurationProperty("Database", IsRequired = true)]
+    public string Database {
+      get { return (string) this["Database"]; }
+      set { this["Database"] = value; }
+    }
+
+    /// <summary>
+    /// Specifies the uri of the influxdb endpoint.
+    /// </summary>
     [ConfigurationProperty("Uri", IsRequired = true)]
     public string Uri {
       get { return (string) this["Uri"]; }

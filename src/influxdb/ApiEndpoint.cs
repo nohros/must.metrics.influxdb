@@ -30,7 +30,7 @@ namespace Nohros.Metrics.Influx
 
     const int kMaxRetryAttempts = 5;
 
-    const string kRequestPath = "series?api_key={0}";
+    const string kRequestPath = "write?db={0}";
 
     readonly CookieContainer cookies_;
     readonly Uri request_uri_;
@@ -40,16 +40,16 @@ namespace Nohros.Metrics.Influx
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiEndpoint"/> by
-    /// using the given endpoint uri and api key.
+    /// using the given endpoint uri and database.
     /// </summary>
     /// <param name="endpoint_uri">
-    /// The address to the influx endpoint.
+    /// The address to the influxdb endpoint.
     /// </param>
-    /// <param name="api_key">
-    /// The api key for the influx application.
+    /// <param name="database">
+    /// The name of the database that should be used to store the metrics.
     /// </param>
-    public ApiEndpoint(string endpoint_uri, string api_key)
-      : this(new Uri(endpoint_uri), api_key, string.Empty) {
+    public ApiEndpoint(string endpoint_uri, string database)
+      : this(new Uri(endpoint_uri), database, string.Empty) {
     }
 
     /// <summary>
@@ -57,18 +57,18 @@ namespace Nohros.Metrics.Influx
     /// using the given endpoint uri and api key.
     /// </summary>
     /// <param name="endpoint_uri">
-    /// The address to the influx endpoint.
+    /// The address to the influxdb endpoint.
     /// </param>
-    /// <param name="api_key">
-    /// The api key for the influx application.
+    /// <param name="database">
+    /// The name of the database that should be used to store the metrics.
     /// </param>
     /// <param name="proxy">
     /// A string containing the proxy to be used to post the series to
     /// influx servers. The proxy should be specified in the format:
     /// "http[s]://[username]:[password]@proxy.com"
     /// </param>
-    public ApiEndpoint(string endpoint_uri, string api_key, string proxy)
-      : this(new Uri(endpoint_uri), api_key, proxy) {
+    public ApiEndpoint(string endpoint_uri, string database, string proxy)
+      : this(new Uri(endpoint_uri), database, proxy) {
     }
 
     /// <summary>
@@ -78,11 +78,11 @@ namespace Nohros.Metrics.Influx
     /// <param name="base_uri">
     /// The address to the influx endpoint.
     /// </param>
-    /// <param name="api_key">
-    /// The api key for the influx application.
+    /// <param name="database">
+    /// The name of the database that should be used to store the metrics.
     /// </param>
-    public ApiEndpoint(Uri base_uri, string api_key)
-      : this(base_uri, api_key, string.Empty) {
+    public ApiEndpoint(Uri base_uri, string database)
+      : this(base_uri, database, string.Empty) {
     }
 
     /// <summary>
@@ -90,19 +90,24 @@ namespace Nohros.Metrics.Influx
     /// using the given endpoint uri and api key.
     /// </summary>
     /// <param name="base_uri">
-    /// The address to the influx endpoint.
+    /// The address to the influxdb endpoint.
     /// </param>
-    /// <param name="api_key">
-    /// The api key for the influx application.
+    /// <param name="database">
+    /// The name of the database that should be used to store the metrics.
     /// </param>
-    public ApiEndpoint(Uri base_uri, string api_key, string proxy) {
-      if (base_uri == null || api_key == null) {
+    /// <param name="proxy">
+    /// A string containing the proxy to be used to post the series to
+    /// influx servers. The proxy should be specified in the format:
+    /// "http[s]://[username]:[password]@proxy.com"
+    /// </param>
+    public ApiEndpoint(Uri base_uri, string database, string proxy) {
+      if (base_uri == null || database == null) {
         throw new ArgumentNullException(base_uri == null
           ? "base_uri"
-          : "api_key");
+          : "database");
       }
 
-      request_uri_ = new Uri(base_uri, kRequestPath.Fmt(api_key));
+      request_uri_ = new Uri(base_uri, kRequestPath.Fmt(database));
       cookies_ = new CookieContainer();
 
       logger_ = InfluxLogger.ForCurrentProcess;
@@ -159,6 +164,8 @@ namespace Nohros.Metrics.Influx
           }
           retries_.Dequeue();
         }
+      } else {
+        retries_.Enqueue(new Retry(series));
       }
       return posted;
     }
@@ -192,13 +199,13 @@ namespace Nohros.Metrics.Influx
       return accepted;
     }
 
-    HttpWebResponse HttpPost(string json) {
+    HttpWebResponse HttpPost(string series) {
       var request = CreateRequest();
       request.CookieContainer = cookies_;
-      request.Accept = "application/json";
-      request.ContentType = "application/json";
+      request.Accept = "*/*";
+      request.ContentType = "text/plain; charset=utf-8";
 
-      byte[] data = Encoding.UTF8.GetBytes(json);
+      byte[] data = Encoding.UTF8.GetBytes(series);
 
       request.Method = "POST";
       request.ContentLength = data.Length;
