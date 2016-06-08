@@ -4,7 +4,7 @@ namespace Nohros.Metrics.Influx.Config
 {
   /// <summary>
   /// Defines the configuration section that will contains the configuration
-  /// inbformation for datadog's endpoints.
+  /// information for infliuxdb's endpoints.
   /// </summary>
   public class ApiEndpointsConfig : ConfigurationSection
   {
