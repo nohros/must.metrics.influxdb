@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Nohros.Concurrent;
 using Nohros.Extensions.Time;
@@ -109,18 +110,13 @@ namespace Nohros.Metrics.Influx
 
     void WriteSerie(Serie serie, StringBuilder points) {
       long epoch_ns = serie.Timestamp.ToUnixEpoch().ToNanos(TimeUnit.Seconds);
-      string measure =
-        (serie.Measure%1 == 0d)
-          ? serie.Measure.ToString("0i")
-          : serie.Measure.ToString("G");
-
       points
         .Append(serie.Name)
         .Append(",")
         .Append(serie.Tags)
         .Append(" ")
         .Append("value=")
-        .Append(measure)
+        .Append(serie.Measure.ToString(CultureInfo.InvariantCulture))
         .Append(" ")
         .Append(epoch_ns)
         .Append("\n");
