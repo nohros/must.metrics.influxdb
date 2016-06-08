@@ -7,9 +7,9 @@ using Nohros.Extensions.Time;
 using System.Linq;
 using Nohros.Resources;
 
-namespace Nohros.Metrics.Datadog
+namespace Nohros.Metrics.Influx
 {
-  internal class DatadogObserver : IDatadogMeasureObserver
+  internal class InfluxObserver : IInfluxMeasureObserver
   {
     class Serie
     {
@@ -28,7 +28,7 @@ namespace Nohros.Metrics.Datadog
     readonly NonReentrantSchedule scheduler_;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DatadogObserver"/> by
+    /// Initializes a new instance of the <see cref="InfluxObserver"/> by
     /// using the given <paramref name="endpoint"/> and <paramref name="host"/>.
     /// </summary>
     /// <param name="endpoint">
@@ -37,12 +37,12 @@ namespace Nohros.Metrics.Datadog
     /// <param name="host">
     /// The name of the host that should be associated with the measures.
     /// </param>
-    public DatadogObserver(IApiEndpoint endpoint, string host)
+    public InfluxObserver(IApiEndpoint endpoint, string host)
       : this(endpoint, host, TimeSpan.FromSeconds(30)) {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DatadogObserver"/> by
+    /// Initializes a new instance of the <see cref="InfluxObserver"/> by
     /// using the given <paramref name="endpoint"/> and <paramref name="host"/>.
     /// </summary>
     /// <param name="endpoint">
@@ -55,12 +55,12 @@ namespace Nohros.Metrics.Datadog
     /// A string that can be used to distinguish one application instance
     /// from another.
     /// </param>
-    public DatadogObserver(IApiEndpoint endpoint, string host, string app)
+    public InfluxObserver(IApiEndpoint endpoint, string host, string app)
       : this(endpoint, host, TimeSpan.FromSeconds(30), app) {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DatadogObserver"/> by
+    /// Initializes a new instance of the <see cref="InfluxObserver"/> by
     /// using the given <paramref name="endpoint"/>, <paramref name="host"/>
     /// and <paramref name="ttl"/>.
     /// </summary>
@@ -72,7 +72,7 @@ namespace Nohros.Metrics.Datadog
     /// </param>
     /// <param name="ttl">
     /// The maximum time that a mesure should be keep in cache, before send it
-    /// to datadog's.
+    /// to influx's.
     /// </param>
     /// <remarks>
     /// The <paramref name="ttl"/> should be greater than or equals to
@@ -80,12 +80,12 @@ namespace Nohros.Metrics.Datadog
     /// <see cref="TimeSpan.Zero"/> the default <paramref name="ttl"/> of
     /// third seconds will be used.
     /// </remarks>
-    public DatadogObserver(IApiEndpoint endpoint, string host, TimeSpan ttl)
+    public InfluxObserver(IApiEndpoint endpoint, string host, TimeSpan ttl)
       : this(endpoint, host, ttl, string.Empty) {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DatadogObserver"/> by
+    /// Initializes a new instance of the <see cref="InfluxObserver"/> by
     /// using the given <paramref name="endpoint"/>, <paramref name="host"/>
     /// <paramref name="ttl"/> and <paramref name="app"/>.
     /// </summary>
@@ -97,7 +97,7 @@ namespace Nohros.Metrics.Datadog
     /// </param>
     /// <param name="ttl">
     /// The maximum time that a mesure should be keep in cache, before send it
-    /// to datadog's.
+    /// to influx's.
     /// </param>
     /// <param name="app">
     /// The application's name.
@@ -109,10 +109,10 @@ namespace Nohros.Metrics.Datadog
     /// third seconds will be used.
     /// <para>
     /// The application's name will be added as a prefix to all measures
-    /// before sending it to datadog's endpoint.
+    /// before sending it to influx's endpoint.
     /// </para>
     /// </remarks>
-    public DatadogObserver(IApiEndpoint endpoint, string host, TimeSpan ttl,
+    public InfluxObserver(IApiEndpoint endpoint, string host, TimeSpan ttl,
       string app) {
       if (host == null) {
         throw new ArgumentNullException("host");

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using Nohros.Extensions;
 using Nohros.Extensions.Time;
 using Nohros.Metrics;
-using Nohros.Metrics.Datadog;
+using Nohros.Metrics.Influx;
 
 namespace Must.Metrics.Datadog.Tests
 {
@@ -21,7 +21,7 @@ namespace Must.Metrics.Datadog.Tests
     }
 
     [Test]
-    public void should_serialize_measure_into_datadog_format() {
+    public void should_serialize_measure_into_influx_format() {
       var tags =
         new Tags.Builder()
           .WithTag("tag1", "tagValue1")

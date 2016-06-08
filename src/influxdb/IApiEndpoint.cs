@@ -1,4 +1,4 @@
-﻿namespace Nohros.Metrics.Datadog
+﻿namespace Nohros.Metrics.Influx
 {
   public interface IApiEndpoint
   {

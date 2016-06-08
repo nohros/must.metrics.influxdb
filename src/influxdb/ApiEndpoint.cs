@@ -4,7 +4,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Nohros.Extensions;
-using Nohros.Metrics.Datadog;
 
 namespace Nohros.Metrics.Influx
 {
@@ -44,10 +43,10 @@ namespace Nohros.Metrics.Influx
     /// using the given endpoint uri and api key.
     /// </summary>
     /// <param name="endpoint_uri">
-    /// The address to the datadog endpoint.
+    /// The address to the influx endpoint.
     /// </param>
     /// <param name="api_key">
-    /// The api key for the datadog application.
+    /// The api key for the influx application.
     /// </param>
     public ApiEndpoint(string endpoint_uri, string api_key)
       : this(new Uri(endpoint_uri), api_key, string.Empty) {
@@ -58,14 +57,14 @@ namespace Nohros.Metrics.Influx
     /// using the given endpoint uri and api key.
     /// </summary>
     /// <param name="endpoint_uri">
-    /// The address to the datadog endpoint.
+    /// The address to the influx endpoint.
     /// </param>
     /// <param name="api_key">
-    /// The api key for the datadog application.
+    /// The api key for the influx application.
     /// </param>
     /// <param name="proxy">
     /// A string containing the proxy to be used to post the series to
-    /// datadog servers. The proxy should be specified in the format:
+    /// influx servers. The proxy should be specified in the format:
     /// "http[s]://[username]:[password]@proxy.com"
     /// </param>
     public ApiEndpoint(string endpoint_uri, string api_key, string proxy)
@@ -77,10 +76,10 @@ namespace Nohros.Metrics.Influx
     /// using the given endpoint uri and api key.
     /// </summary>
     /// <param name="base_uri">
-    /// The address to the datadog endpoint.
+    /// The address to the influx endpoint.
     /// </param>
     /// <param name="api_key">
-    /// The api key for the datadog application.
+    /// The api key for the influx application.
     /// </param>
     public ApiEndpoint(Uri base_uri, string api_key)
       : this(base_uri, api_key, string.Empty) {
@@ -91,10 +90,10 @@ namespace Nohros.Metrics.Influx
     /// using the given endpoint uri and api key.
     /// </summary>
     /// <param name="base_uri">
-    /// The address to the datadog endpoint.
+    /// The address to the influx endpoint.
     /// </param>
     /// <param name="api_key">
-    /// The api key for the datadog application.
+    /// The api key for the influx application.
     /// </param>
     public ApiEndpoint(Uri base_uri, string api_key, string proxy) {
       if (base_uri == null || api_key == null) {

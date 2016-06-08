@@ -34,6 +34,9 @@
     <Reference Include="nohros">
       <HintPath>..\..\packages\must.common.2.2.0.0\lib\net40\nohros.dll</HintPath>
     </Reference>
+    <Reference Include="nohros.metrics">
+      <HintPath>..\..\packages\must.metrics.0.14.0.0\lib\net40\nohros.metrics.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -50,11 +53,11 @@
     <Compile Include="config\ApiEndpointConfigCollection.cs" />
     <Compile Include="config\ApiEndpointsConfig.cs" />
     <Compile Include="InfluxLogger.cs" />
-    <Compile Include="DatadogObserver.cs" />
+    <Compile Include="InfluxObserver.cs" />
     <Compile Include="DatadogObserverFactory.cs" />
     <Compile Include="ApiEndpoint.cs" />
     <Compile Include="IApiEndpoint.cs" />
-    <Compile Include="IDatadogMeasureObserver.cs" />
+    <Compile Include="IInfluxMeasureObserver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="R.Designer.cs">
       <AutoGen>True</AutoGen>

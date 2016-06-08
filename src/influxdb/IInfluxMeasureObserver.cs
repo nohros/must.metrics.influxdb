@@ -1,22 +1,22 @@
 ﻿using Nohros.Metrics.Reporting;
 
-namespace Nohros.Metrics.Datadog
+namespace Nohros.Metrics.Influx
 {
   /// <summary>
   /// Defines a <see cref="IMeasureObserver"/> that send measures
-  /// to a datadog endpoint.
+  /// to a influx endpoint.
   /// </summary>
   /// <remarks>
   /// </remarks>
-  public interface IDatadogMeasureObserver : IMeasureObserver
+  public interface IInfluxMeasureObserver : IMeasureObserver
   {
     /// <summary>
-    /// Start sending metrics to the datadog's endpoint.
+    /// Start sending metrics to the influx's endpoint.
     /// </summary>
     void Start();
 
     /// <summary>
-    /// Stop sending metrics to the datadog's endpoint.
+    /// Stop sending metrics to the influx's endpoint.
     /// </summary>
     void Stop();
   }

@@ -8,8 +8,8 @@
     <ProjectGuid>{28616229-ADDC-424C-A184-A00E85B6D829}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>properties</AppDesignerFolder>
-    <RootNamespace>Must.Metrics.Datadog.Tests</RootNamespace>
-    <AssemblyName>must.metrics.datadog.tests</AssemblyName>
+    <RootNamespace>Must.Metrics.Influx.Tests</RootNamespace>
+    <AssemblyName>must.metrics.influx.tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
