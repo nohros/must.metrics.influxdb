@@ -1,27 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>must.metrics.influxdb</id>
-        <version>0.1.0</version>
-        <title>Must - Metrics for InfluxDB</title>
-        <authors>Nohros Inc</authors>
-        <owners>Nohros Inc</owners>
-        <projectUrl>http://code.google.com/p/nohros-must</projectUrl>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>
-		  A metrics observer that push metrics to influxdb plataform.
-        </description>
-        <summary>The influxdb implementation of the metrics package of the nohros must framework.</summary>
-        <copyright>Nohros Inc</copyright>
-        <language>en-US</language>
-        <tags>csharp framework nohros security metrics must influxdb</tags>
+      <id>must.metrics.influxdb</id>
+      <version>0.1.0</version>
+      <title>Must - Metrics for InfluxDB</title>
+      <authors>Nohros Inc</authors>
+      <owners>Nohros Inc</owners>
+      <projectUrl>http://code.google.com/p/nohros-must</projectUrl>
+      <requireLicenseAcceptance>false</requireLicenseAcceptance>
+      <description>
+        A metrics observer that push metrics to influxdb plataform.
+      </description>
+      <summary>The influxdb implementation of the metrics package of the nohros must framework.</summary>
+      <copyright>Nohros Inc</copyright>
+      <language>en-US</language>
+      <tags>csharp framework nohros security metrics must influxdb</tags>
     <dependencies>
       <dependency id="must.common" version="2.10.0" />
       <dependency id="must.metrics" version="0.13.4" />
     </dependencies>
     </metadata>
     <files>
-      <file src="bin\release\nohros.metrics.influxdb.dll" target="lib\nohros.metrics.influxdb.dll" />
-	  <file src="bin\release\nohros.metrics.influxdb.pdb" target="lib\nohros.metrics.influxdb.pdb" />
+      <file src="..\bin\release\nohros.metrics.influxdb.dll" target="lib\nohros.metrics.influxdb.dll" />
+      <file src="..\bin\release\nohros.metrics.influxdb.pdb" target="lib\nohros.metrics.influxdb.pdb" />
     </files>
 </package>
