@@ -112,9 +112,16 @@ namespace Nohros.Metrics.Influx
       long epoch_ns = serie.Timestamp.ToUnixEpoch().ToNanos(TimeUnit.Seconds);
       points
         .Append(serie.Name)
-        .Append(",")
-        .Append(serie.Tags)
-        .Append(" ")
+        .Append(",");
+
+      foreach (string tag in serie.Tags) {
+        points
+          .Append(tag)
+          .Append(",");
+      }
+
+      points[points.Length - 1] = ' ';
+      points
         .Append("value=")
         .Append(serie.Measure.ToString(CultureInfo.InvariantCulture))
         .Append(" ")
