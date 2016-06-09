@@ -3,10 +3,8 @@ using System.Threading;
 using NUnit.Framework;
 using Nohros.Extensions;
 using Nohros.Extensions.Time;
-using Nohros.Metrics;
-using Nohros.Metrics.Influx;
 
-namespace Must.Metrics.Datadog.Tests
+namespace Nohros.Metrics.Influx.Tests
 {
   public class DatadogObserverTests
   {
@@ -31,24 +29,17 @@ namespace Must.Metrics.Datadog.Tests
 
       var date = DateTime.Now;
       var api = new ApiEndpointMock();
-      var observer = new DatadogObserver(api, "ACAOAFPAPPBACK",
-        TimeSpan.FromMilliseconds(50));
+      var observer = new InfluxObserver(api, TimeSpan.FromMilliseconds(50));
       observer.Observe(measure, date);
       observer.Observe(measure, date);
 
-      string json =
-        "{{\"series\":[{{\"metric\":\"myMetric\",\"points\":[[{0},{1}]],\"type\":\"gauge\",\"host\":\"{2}\",\"tags\":[\"{3}\"]}}]}}"
-          .Fmt(date.ToUnixEpoch(), measure.Value, "ACAOAFPAPPBACK",
-            "tag1:tagValue1");
-
-      string json2 =
-        "{{\"series\":[{{\"metric\":\"myMetric\",\"points\":[[{0},{1}]],\"type\":\"gauge\",\"host\":\"{2}\",\"tags\":[\"{3}\"]}},{{\"metric\":\"myMetric\",\"points\":[[{0},{1}]],\"type\":\"gauge\",\"host\":\"{2}\",\"tags\":[\"{3}\"]}}]}}"
-          .Fmt(date.ToUnixEpoch(), measure.Value, "ACAOAFPAPPBACK",
-            "tag1:tagValue1");
+      long epoch = date.ToUnixEpoch().ToNanos(TimeUnit.Seconds);
+      string points = "myMetric,{0} value={1} {2}\nmyMetric,{0} value={1} {2}\n"
+        .Fmt("tag1=tagValue1", measure.Value, epoch.ToString());
 
       Thread.Sleep(TimeSpan.FromMilliseconds(100));
 
-      Assert.That(api.PostedSeries, Is.EqualTo(json2));
+      Assert.That(api.PostedSeries, Is.EqualTo(points));
     }
   }
 }
