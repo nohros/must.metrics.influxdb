@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>properties</AppDesignerFolder>
     <RootNamespace>Nohros.Metrics.Influx</RootNamespace>
-    <AssemblyName>nohros.metrics.influx</AssemblyName>
+    <AssemblyName>nohros.metrics.influxdb</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

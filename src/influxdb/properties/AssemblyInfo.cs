@@ -5,15 +5,15 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("nohros.metrics.influx")]
-[assembly: AssemblyDescription("nohros.metrics.influx")]
+[assembly: AssemblyTitle("nohros.metrics.influxdb")]
+[assembly: AssemblyDescription("nohros.metrics.influxdb")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Norhos Inc")]
+[assembly: AssemblyCompany("Nohros Inc")]
 [assembly: AssemblyProduct("Nohros metrics for InfluxDB")]
 [assembly: AssemblyCopyright("Copyright ©  2015 by Nohros Inc")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: InternalsVisibleTo("must.metrics.influx.tests")]
+[assembly: InternalsVisibleTo("nohros.metrics.influxdb.tests")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
