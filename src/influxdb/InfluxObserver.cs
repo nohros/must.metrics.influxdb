@@ -2,28 +2,22 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Text;
+using Nohros.Collections;
 using Nohros.Concurrent;
 using Nohros.Extensions.Time;
-using System.Linq;
+using Nohros.Logging;
 using Nohros.Resources;
 
 namespace Nohros.Metrics.Influx
 {
   internal class InfluxObserver : IInfluxMeasureObserver
   {
-    class Serie
-    {
-      public string Name { get; set; }
-      public double Measure { get; set; }
-      public string[] Tags { get; set; }
-      public DateTime Timestamp { get; set; }
-    }
-
     const int kMaxPointsPerPost = 5000;
 
     readonly IApiEndpoint endpoint_;
-    readonly ConcurrentQueue<Serie> measures_;
+    readonly ConcurrentQueue<InfluxMeasure> measures_;
     readonly NonReentrantSchedule scheduler_;
 
     /// <summary>
@@ -66,7 +60,7 @@ namespace Nohros.Metrics.Influx
 
       endpoint_ = endpoint;
 
-      measures_ = new ConcurrentQueue<Serie>();
+      measures_ = new ConcurrentQueue<InfluxMeasure>();
 
       TimeSpan half_ttl =
         ttl == TimeSpan.Zero
@@ -84,37 +78,41 @@ namespace Nohros.Metrics.Influx
       scheduler_.Stop().WaitOne();
     }
 
-    void Post() {
-      var series = new List<Serie>(measures_.Count);
+    /// <inheritdoc/>
+    public bool Post(IReadOnlyList<InfluxMeasure> measures) {
+      var points = new StringBuilder();
+      foreach (InfluxMeasure measure in measures) {
+        WriteSerie(measure, points);
+      }
+      return endpoint_.PostSeries(points.ToString());
+    }
 
+    void Post() {
+      var measures = new List<InfluxMeasure>(measures_.Count);
       int count = 0;
       do {
-        // Keep removing series from the queue until the operation fail or the
-        // limit is reached.
-        Serie serie;
-        while (measures_.TryDequeue(out serie) && count < kMaxPointsPerPost) {
-          series.Add(serie);
+        // Keep removing measures from the queue until the operation fail or
+        // the limit is reached.
+        InfluxMeasure measure;
+        while (measures_.TryDequeue(out measure) && count < kMaxPointsPerPost) {
+          measures.Add(measure);
           count++;
         }
 
-        if (series.Count > 0) {
-          var points = new StringBuilder();
-          foreach (var s in series) {
-            WriteSerie(s, points);
-          }
-          endpoint_.PostSeries(points.ToString());
+        if (measures.Count > 0) {
+          Post(measures.AsReadOnlyList());
         }
         count = 0;
       } while (count >= kMaxPointsPerPost);
     }
 
-    void WriteSerie(Serie serie, StringBuilder points) {
-      long epoch_ns = serie.Timestamp.ToUnixEpoch().ToNanos(TimeUnit.Seconds);
+    void WriteSerie(InfluxMeasure measure, StringBuilder points) {
+      long epoch_ns = measure.Timestamp.ToUnixEpoch().ToNanos(TimeUnit.Seconds);
       points
-        .Append(serie.Name)
+        .Append(measure.Name)
         .Append(",");
 
-      foreach (string tag in serie.Tags) {
+      foreach (string tag in measure.Tags) {
         points
           .Append(tag)
           .Append(",");
@@ -123,29 +121,15 @@ namespace Nohros.Metrics.Influx
       points[points.Length - 1] = ' ';
       points
         .Append("value=")
-        .Append(serie.Measure.ToString(CultureInfo.InvariantCulture))
+        .Append(measure.Measure.ToString(CultureInfo.InvariantCulture))
         .Append(" ")
         .Append(epoch_ns)
         .Append("\n");
     }
 
     public void Observe(Measure measure, DateTime timestamp) {
-      var serie = new Serie {
-        Measure = measure.Value,
-        Name = measure.MetricConfig.Name,
-        Timestamp = timestamp
-      };
-
-      // influxdb recommendto sort the tags by key for better performance
-      Tag[] tags = measure.MetricConfig.Tags.OrderBy(s => s.Name).ToArray();
-      var plain_tags = new string[tags.Length];
-      for (int i = 0; i < tags.Length; i++) {
-        Tag tag = tags[i];
-        plain_tags[i] = tag.Name + "=" + tag.Value;
-      }
-      serie.Tags = plain_tags;
-
-      measures_.Enqueue(serie);
+      var point = new InfluxMeasure(measure, timestamp);
+      measures_.Enqueue(point);
     }
   }
 }

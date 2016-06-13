@@ -64,6 +64,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>R.resx</DependentUpon>
     </Compile>
+    <Compile Include="InfluxMeasure.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

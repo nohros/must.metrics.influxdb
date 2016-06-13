@@ -1,4 +1,5 @@
-﻿using Nohros.Metrics.Reporting;
+﻿using Nohros.Collections;
+using Nohros.Metrics.Reporting;
 
 namespace Nohros.Metrics.Influx
 {
@@ -19,5 +20,14 @@ namespace Nohros.Metrics.Influx
     /// Stop sending metrics to the influx's endpoint.
     /// </summary>
     void Stop();
+
+    /// <summary>
+    /// Posts a collection of <see cref="InfluxMeasure"/> to a influxdb
+    /// endpoint synchronously.
+    /// </summary>
+    /// <param name="measures">
+    /// The collection of <see cref="InfluxMeasure"/> to be posted.
+    /// </param>
+    bool Post(IReadOnlyList<InfluxMeasure> measures);
   }
 }
